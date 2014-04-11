@@ -12,15 +12,39 @@ $discuz = & discuz_core::instance();
 $discuz->init();
 
 
+$posttables = array('forum_thread','forum_attachment','forum_attachment_0','forum_attachment_1','forum_attachment_2','forum_attachment_3','forum_attachment_4','forum_attachment_5','forum_attachment_6','forum_attachment_7','forum_attachment_8','forum_attachment_9','forum_poll','forum_polloption','forum_polloption_image','forum_pollvoter','forum_post','forum_post_location','forum_postcomment','forum_postlog','forum_poststick');
+
+
+foreach ($posttables  as  $value) {
+	DB::query("DELETE FROM ".DB::table($value));
+}
+
+
+$tableSameArray = array();
+
+//比较两个表获得两2个表中相同的部分
+foreach ($posttables as $table) {
+	$TempAry1 = $TempAry2 = array();
+	$query = DB::query("desc ".DB::table($table));
+	while($value = DB::fetch($query)) {
+		$TempAry1[] = $value['Field'];
+	}
+	$query = DB::query("desc convert_lefen.".DB::table($table));
+	while($value = DB::fetch($query)) {
+		$TempAry2[] = $value['Field'];
+	}
+	$tableSameArray[$table] = array_intersect($TempAry1,$TempAry2);
+}
+
 
 class threadconvert 
 {
 
 	function lenovothread($tid){
-		global $tableSameArray,$threadposttables_lephone;
+		global $tableSameArray,$posttables;
 		$insert = $insertlen = array();
 					
-		foreach ($threadposttables_lephone as  $table) {
+		foreach ($posttables as  $table) {
 			DB::query("insert into ".DB::table($table)." (".join(',',$tableSameArray[$table]).") select ".join(',',$tableSameArray[$table])." from convert_lefen.".DB::table($table)." where tid ='$tid'");
 		}
 
@@ -58,6 +82,19 @@ class threadconvert
 		DB::insert('common_member', $insert);
 		DB::insert('common_member_lephoneid', $insertlen);
 	}
+}
+
+
+
+$stdout = fopen('php://stdout', 'w');
+
+ini_set('memory_limit','12800M');
+
+$query = DB::query("SELECT * FROM convert_lefen.".DB::table('common_member')." ORDER BY uid asc");
+while($user = DB::fetch($query)) {
+	fwrite(STDOUT,"lefen -> $user[uid]\r\n"); 
+	$k = memberconvert::lenovomember($user['uid']);
+	
 }
 
 echo'<pre>';
