@@ -17,25 +17,33 @@ $forumtables = array('forum_forum','forum_forumfield','forum_threadclass');
 
 
 foreach ($forumtables  as  $value) {
-	DB::query("DELETE FROM ".DB::table($value));
+	DB::query("truncate table  ".DB::table($value));
 }
+DB::query("truncate table  ".DB::table('forum_forum_lephonefid'));
 
 
-$tableSameArray = array();
+$tableSameArray = $CcTableSameArray = array();
 
 //比较两个表获得两2个表中相同的部分
 foreach ($forumtables as $table) {
 	$TempAry1 = $TempAry2 = array();
 	$query = DB::query("desc ".DB::table($table));
 	while($value = DB::fetch($query)) {
-		$TempAry1[] = $value['Field'];
+		$TempAry1[$value['Field']] = $value['Field'];
 	}
 	$query = DB::query("desc convert_lefen.".DB::table($table));
 	while($value = DB::fetch($query)) {
-		$TempAry2[] = $value['Field'];
+		$TempAry2[$value['Field']] = $value['Field'];
+	}
+	$query = DB::query("desc convert_lephone.".DB::table($table));
+	while($value = DB::fetch($query)) {
+		$TempAry3[$value['Field']] = $value['Field'];
 	}
 	$tableSameArray[$table] = array_intersect($TempAry1,$TempAry2);
+	$CcTableSameArray[$table] = array_intersect($TempAry1,$TempAry3);
 }
+
+
 
 class forumconvert 
 {
@@ -43,53 +51,77 @@ class forumconvert
 	function lenovoforum($fid){
 		global $tableSameArray,$forumtables;
 		$insert = $insertlen = array();
-					
 		foreach ($forumtables as  $table) {
+			if ($table == 'forum_forum') {
+				foreach (array('displayorder','lastpost') as $key=>$value) {
+					unset($tableSameArray[$table][$value]);
+				}
+			}
+
+			if ($table == 'forum_forumfield') {
+				foreach (array('icon','threadtypes','moderators','viewperm','postperm','replyperm','getattachperm','postattachperm','postimageperm','spviewperm') as $key=>$value) {
+					unset($tableSameArray[$table][$value]);
+				}
+			}
 			DB::query("insert into ".DB::table($table)." (".join(',',$tableSameArray[$table]).") select ".join(',',$tableSameArray[$table])." from convert_lefen.".DB::table($table)." where fid ='$fid'");
 		}
 
 	}
-	function lephoneforum($tid){
-		global $membeructables,$memberfields;
+	function lephoneforum($fid,$forum){
+		global $CcTableSameArray,$forumtables;
+		static $groupids = array();
 
 		//SHOW TABLE STATUS from convert_lefen where name='pre_ucenter_members';
-		$tabstatus =  DB::fetch_first("SHOW TABLE STATUS where name='pre_ucenter_members';");
-		$newuid= $tabstatus['Auto_increment'];
-
-		foreach ($membeructables as  $value) {
-			$levalue = str_replace('ucenter_', 'uc_', $value);
-			$member = DB::fetch_first("SELECT * FROM convert_lephone.$levalue WHERE `uid`='$uid'" );
-			$member['uid'] = $newuid;
-			if ($member['username']) {
-				$member['username'] = $member['username'].'@lephone';
-			}
-			DB::insert($value, $member);
+		$tabstatus =  DB::fetch_first("SHOW TABLE STATUS where name='pre_forum_forum';");
+		$newfid= $tabstatus['Auto_increment'];
+		if ($forum['type'] == 'group') {
+			$groupids[$fid] = $newfid;
 		}
 
-		$insert = $insertlen = array();
-		$member = DB::fetch_first("SELECT m.* FROM convert_lephone.`pre_common_member` m WHERE m.`uid`='$uid'" );
-		foreach ($memberfields as  $value) {
-			if ($value == 'uid') {
-				$insert[$value] = $newuid;
-			}elseif ($value == 'username') {
-				$insert['username'] = $member['username'].'@lephone';
-			}else{
-				$insert[$value] = $member[$value];
+		DB::insert('forum_forum_lephonefid', array('fid'=>$newfid,'lephonefid'=>$fid));
+
+
+
+		foreach ($forumtables as  $table) {
+
+			if ($table == 'forum_forum') {
+				foreach (array('displayorder','lastpost') as $key=>$value) {
+					unset($tableSameArray[$table][$value]);
+				}
 			}
+
+			if ($table == 'forum_forumfield') {
+				foreach (array('icon','threadtypes','moderators','viewperm','postperm','replyperm','getattachperm','postattachperm','postimageperm','spviewperm') as $key=>$value) {
+					unset($CcTableSameArray[$table][$value]);
+				}
+			}
+			if ($table == 'forum_threadclass') {
+				continue;
+			}
+
+			$NewCcTableSameArray = $CcTableSameArray;
+
+			$NewCcTableSameArray[$table]['fid'] = "'$newfid'";
+			if ($forum['type'] != 'group' && $CcTableSameArray[$table]['fup']) {
+				$NewCcTableSameArray[$table]['fup'] = "'{$groupids[$forum['fup']]}'";
+			}
+			DB::query("insert into ".DB::table($table)." (".join(',',$CcTableSameArray[$table]).") select ".join(',',$NewCcTableSameArray[$table])." from convert_lephone.".DB::table($table)." where fid ='$fid'");
 		}
-		$insertlen['uid'] = $newuid;
-		$insertlen['lephoneid'] = $uid;
-		DB::insert('common_member', $insert);
-		DB::insert('common_member_lephoneid', $insertlen);
 	}
 }
+
 
 $query = DB::query("SELECT * FROM convert_lefen.".DB::table('forum_forum')." ORDER BY fid asc");
 while($forum = DB::fetch($query)) {
 	fwrite(STDOUT,"lefen fid -> $forum[fid]\r\n"); 
-	$k = forumconvert::lenovoforum($forum['fid']);
-	
+	forumconvert::lenovoforum($forum['fid']);
 }
 
+$query = DB::query("SELECT * FROM convert_lephone.".DB::table('forum_forum')." ORDER BY type");
+while($forum = DB::fetch($query)) {
+	fwrite(STDOUT,"lephone fid -> $forum[fid]\r\n"); 
+	forumconvert::lephoneforum($forum['fid'],$forum);
+
+}
 
 ?>
