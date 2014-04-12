@@ -15,6 +15,9 @@ require 'function.php';
 $posttables = array('forum_thread','forum_attachment','forum_attachment_0','forum_attachment_1','forum_attachment_2','forum_attachment_3','forum_attachment_4','forum_attachment_5','forum_attachment_6','forum_attachment_7','forum_attachment_8','forum_attachment_9','forum_poll','forum_polloption','forum_polloption_image','forum_pollvoter','forum_post','forum_post_location','forum_postcomment','forum_postlog','forum_poststick');
 $fids = array(649,668,329,269,335,648,383,669,715,264,400,677,678,728,729,714,690,734,706,705,686,683,699,691,724,713,711,733,737,637,660,674,362,293,639,386,385,662,670,675,687);
 
+
+$postcleartables = array('forum_thread_lephonetid','forum_post_tableid','forum_thread','forum_post','forum_attachment','forum_attachment_0','forum_attachment_1','forum_attachment_2','forum_attachment_3','forum_attachment_4','forum_attachment_5','forum_attachment_6','forum_attachment_7','forum_attachment_8','forum_attachment_9','forum_poll','forum_polloption','forum_polloption_image','forum_pollvoter','forum_post','forum_post_location','forum_postcomment','forum_postlog','forum_poststick');
+
 $bugfid = 730;
 
 
@@ -61,7 +64,7 @@ $totalnum = (int)$_REQUEST['totalnum'];
 
 
 if ($page<2) {
-	foreach ($posttables  as  $value) {
+	foreach ($postcleartables  as  $value) {
 		DB::query("TRUNCATE TABLE ".DB::table($value));
 	}
 	$totalnum = DB::result_first("SELECT count(*)  FROM convert_lefen.".DB::table('forum_thread')." WHERE fid IN (".join(',',$fids).") ORDER BY tid asc");
