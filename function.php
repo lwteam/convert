@@ -1,4 +1,5 @@
 <?php
+set_time_limit(120);
 function showmnextpage($message,$nexturl=false){
 
 	$html ='';

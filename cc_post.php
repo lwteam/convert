@@ -142,7 +142,7 @@ ini_set('memory_limit','12800M');
 
 
 
-$ProcessNum  = 1000;
+$ProcessNum  = 500;
 $page = (int)$_REQUEST['page'];
 $totalnum = (int)$_REQUEST['totalnum'];
 
@@ -152,7 +152,7 @@ if ($page<2) {
 	foreach ($postcleartables  as  $value) {
 		DB::query("TRUNCATE TABLE ".DB::table($value));
 	}
-	$totalnum = DB::result_first("SELECT count(*)  FROM convert_lephone.".DB::table('forum_post')." WHERE tid='570837'");
+	$totalnum = DB::result_first("SELECT count(*)  FROM convert_lephone.".DB::table('forum_post')." ");
 	$page = 1;
 }
 
@@ -164,7 +164,7 @@ if(@ceil($totalnum/$ProcessNum) < $page){
 
 $offset = ($page - 1) * $ProcessNum;
 
-$query = DB::query("SELECT * FROM convert_lephone.".DB::table('forum_post')." WHERE tid='570837'  ORDER BY tid ASC LIMIT $offset,$ProcessNum");
+$query = DB::query("SELECT * FROM convert_lephone.".DB::table('forum_post')."  ORDER BY tid ASC LIMIT $offset,$ProcessNum");
 while($post = DB::fetch($query)) {
 	threadconvert::lephonepost($post['pid']);
 }
