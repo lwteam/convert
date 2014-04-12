@@ -72,9 +72,6 @@ if(@ceil($totalnum/$ProcessNum) < $page){
 	$page = 1;
 }
 
-if($totalnum <= $ProcessNum*$page){
-	showmnextpage('乐粉主题帖子数据已经转换完毕! 将进行乐Phone.CC主题数据转换','cc_thread.php');
-}
 
 $offset = ($page - 1) * $ProcessNum;
 
@@ -82,17 +79,11 @@ $query = DB::query("SELECT * FROM convert_lefen.".DB::table('forum_thread')." WH
 while($thread = DB::fetch($query)) {
 	threadconvert::lenovothread($thread['tid']);
 }
+if($totalnum <= $ProcessNum*$page){
+	showmnextpage('乐粉主题帖子数据已经转换完毕! 将进行乐Phone.CC主题数据转换','cc_thread.php');
+}
+
 showmnextpage("乐粉主题帖子数据正在转换中...".$ProcessNum*$page." / $totalnum",'http://'.$_SERVER['HTTP_HOST'].$_SERVER['PHP_SELF'].'?'.'page='.($page+1).'&totalnum='.$totalnum);
 
-
-
-/*
-$query = DB::query("SELECT * FROM convert_lefen.".DB::table('forum_thread')." WHERE fid IN (".join(',',$fids).") ORDER BY tid asc");
-while($thread = DB::fetch($query)) {
-	echo "lefen thread -> $user[tid]\r\n";
-	$k = threadconvert::lenovothread($thread['tid']);
-	
-}
-*/
 
 ?>

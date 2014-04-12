@@ -92,15 +92,16 @@ if(@ceil($totalnum/$ProcessNum) < $page){
 	$page = 1;
 }
 
-if($totalnum <= $ProcessNum*$page){
-	showmnextpage('乐Phone.CC会员数据已经转换完毕!将进行乐粉主题数据已经转换','thread.php');
-}
+
 
 $offset = ($page - 1) * $ProcessNum;
 
 $query = DB::query("SELECT * FROM convert_lephone.".DB::table('common_member')." ORDER BY uid asc LIMIT $offset,$ProcessNum");
 while($user = DB::fetch($query)) {
 	memberconvert::lephonemember($user['uid']);
+}
+if($totalnum <= $ProcessNum*$page){
+	showmnextpage('乐Phone.CC会员数据已经转换完毕!将进行乐粉主题数据已经转换','thread.php');
 }
 showmnextpage("乐Phone.CC会员数据正在转换中...".$ProcessNum*$page." / $totalnum",'http://'.$_SERVER['HTTP_HOST'].$_SERVER['PHP_SELF'].'?'.'page='.($page+1).'&totalnum='.$totalnum);
 

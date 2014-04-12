@@ -16,6 +16,7 @@ $posttables = array('forum_thread','forum_post','forum_attachment','forum_attach
 
 $postcleartables = array('forum_thread_lephonetid');
 
+$postcleartables = array('forum_thread_lephonetid','forum_post_tableid','forum_thread','forum_post','forum_attachment','forum_attachment_0','forum_attachment_1','forum_attachment_2','forum_attachment_3','forum_attachment_4','forum_attachment_5','forum_attachment_6','forum_attachment_7','forum_attachment_8','forum_attachment_9','forum_poll','forum_polloption','forum_polloption_image','forum_pollvoter','forum_post','forum_post_location','forum_postcomment','forum_postlog','forum_poststick');
 
 
 
@@ -100,7 +101,7 @@ if ($page<2) {
 	foreach ($postcleartables  as  $value) {
 		DB::query("TRUNCATE TABLE ".DB::table($value));
 	}
-	$totalnum = DB::result_first("SELECT count(*)  FROM convert_lephone.".DB::table('forum_thread')." ORDER BY tid asc");
+	$totalnum = DB::result_first("SELECT count(*)  FROM convert_lephone.".DB::table('forum_thread')." WHERE tid='570837' ORDER BY tid asc");
 	$page = 1;
 }
 
@@ -108,16 +109,17 @@ if(@ceil($totalnum/$ProcessNum) < $page){
 	$page = 1;
 }
 
+
+$offset = ($page - 1) * $ProcessNum;
+
+$query = DB::query("SELECT * FROM convert_lephone.".DB::table('forum_thread')." WHERE tid='570837' ORDER BY tid ASC LIMIT $offset,$ProcessNum");
+while($thread = DB::fetch($query)) {
+	threadconvert::lephonethread($thread['tid']);
+}
 if($totalnum <= $ProcessNum*$page){
 	showmnextpage('乐Phone.CC主题数据已经转换完毕! 将进行POST数据转换!','cc_post.php');
 }
 
-$offset = ($page - 1) * $ProcessNum;
-
-$query = DB::query("SELECT * FROM convert_lephone.".DB::table('forum_thread')."  ORDER BY tid ASC LIMIT $offset,$ProcessNum");
-while($thread = DB::fetch($query)) {
-	threadconvert::lephonethread($thread['tid']);
-}
 showmnextpage("乐Phone.CC主题数据正在转换中...".$ProcessNum*$page." / $totalnum",'http://'.$_SERVER['HTTP_HOST'].$_SERVER['PHP_SELF'].'?'.'page='.($page+1).'&totalnum='.$totalnum);
 
 

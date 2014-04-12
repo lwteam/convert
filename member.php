@@ -79,9 +79,7 @@ if(@ceil($totalnum/$ProcessNum) < $page){
 	$page = 1;
 }
 
-if($totalnum <= $ProcessNum*$page){
-	showmnextpage('乐粉会员数据已经转换完毕! 将进行乐Phone.CC会员数据转换!','cc_member.php');
-}
+
 
 $offset = ($page - 1) * $ProcessNum;
 
@@ -89,25 +87,10 @@ $query = DB::query("SELECT * FROM convert_lefen.".DB::table('common_member')." O
 while($user = DB::fetch($query)) {
 	memberconvert::lenovomember($user['uid']);
 }
+if($totalnum <= $ProcessNum*$page){
+	showmnextpage('乐粉会员数据已经转换完毕! 将进行乐Phone.CC会员数据转换!','cc_member.php');
+}
 showmnextpage("乐粉会员数据正在转换中...".$ProcessNum*$page." / $totalnum",'http://'.$_SERVER['HTTP_HOST'].$_SERVER['PHP_SELF'].'?'.'page='.($page+1).'&totalnum='.$totalnum);
 
 
-
-
-
-
-
-/*
-
-
-
-$query = DB::query("SELECT * FROM convert_lefen.".DB::table('common_member')." ORDER BY uid asc");
-while($user = DB::fetch($query)) {
-	fwrite(STDOUT,"lefen -> $user[uid]\r\n"); 
-	$k = memberconvert::lenovomember($user['uid']);
-	
-}
-
-
-*/
 ?>
