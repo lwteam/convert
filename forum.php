@@ -17,7 +17,7 @@ $forumtables = array('forum_forum','forum_forumfield','forum_threadclass');
 
 
 foreach ($forumtables  as  $value) {
-	DB::query("truncate table  ".DB::table($value));
+	DB::query("TRUNCATE TABLE  ".DB::table($value));
 }
 DB::query("truncate table  ".DB::table('forum_forum_lephonefid'));
 
@@ -59,7 +59,7 @@ class forumconvert
 			}
 
 			if ($table == 'forum_forumfield') {
-				foreach (array('icon','threadtypes','moderators','viewperm','postperm','replyperm','getattachperm','postattachperm','postimageperm','spviewperm') as $key=>$value) {
+				foreach (array('icon','moderators','viewperm','postperm','replyperm','getattachperm','postattachperm','postimageperm','spviewperm') as $key=>$value) {
 					unset($tableSameArray[$table][$value]);
 				}
 			}

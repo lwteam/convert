@@ -6,18 +6,17 @@ if (php_sapi_name() == 'cli') {
 }
 
 chdir('../');
-
 require './source/class/class_core.php';
 $discuz = & discuz_core::instance();
 $discuz->init();
 
+require 'function.php';
 
 $posttables = array('forum_thread','forum_attachment','forum_attachment_0','forum_attachment_1','forum_attachment_2','forum_attachment_3','forum_attachment_4','forum_attachment_5','forum_attachment_6','forum_attachment_7','forum_attachment_8','forum_attachment_9','forum_poll','forum_polloption','forum_polloption_image','forum_pollvoter','forum_post','forum_post_location','forum_postcomment','forum_postlog','forum_poststick');
+$fids = array(649,668,329,269,335,648,383,669,715,264,400,677,678,728,729,714,690,734,706,705,686,683,699,691,724,713,711,733,737,637,660,674,362,293,639,386,385,662,670,675,687);
 
+$bugfid = 730;
 
-foreach ($posttables  as  $value) {
-	DB::query("DELETE FROM ".DB::table($value));
-}
 
 
 $tableSameArray = array();
@@ -39,7 +38,6 @@ foreach ($posttables as $table) {
 
 class threadconvert 
 {
-
 	function lenovothread($tid){
 		global $tableSameArray,$posttables;
 		$insert = $insertlen = array();
@@ -49,57 +47,52 @@ class threadconvert
 		}
 
 	}
-	function lephonethread($tid){
-		global $membeructables,$memberfields;
-
-		//SHOW TABLE STATUS from convert_lefen where name='pre_ucenter_members';
-		$tabstatus =  DB::fetch_first("SHOW TABLE STATUS where name='pre_ucenter_members';");
-		$newuid= $tabstatus['Auto_increment'];
-
-		foreach ($membeructables as  $value) {
-			$levalue = str_replace('ucenter_', 'uc_', $value);
-			$member = DB::fetch_first("SELECT * FROM convert_lephone.$levalue WHERE `uid`='$uid'" );
-			$member['uid'] = $newuid;
-			if ($member['username']) {
-				$member['username'] = $member['username'].'@lephone';
-			}
-			DB::insert($value, $member);
-		}
-
-		$insert = $insertlen = array();
-		$member = DB::fetch_first("SELECT m.* FROM convert_lephone.`pre_common_member` m WHERE m.`uid`='$uid'" );
-		foreach ($memberfields as  $value) {
-			if ($value == 'uid') {
-				$insert[$value] = $newuid;
-			}elseif ($value == 'username') {
-				$insert['username'] = $member['username'].'@lephone';
-			}else{
-				$insert[$value] = $member[$value];
-			}
-		}
-		$insertlen['uid'] = $newuid;
-		$insertlen['lephoneid'] = $uid;
-		DB::insert('common_member', $insert);
-		DB::insert('common_member_lephoneid', $insertlen);
-	}
 }
 
-
-
-$stdout = fopen('php://stdout', 'w');
 
 ini_set('memory_limit','12800M');
 
-$query = DB::query("SELECT * FROM convert_lefen.".DB::table('common_member')." ORDER BY uid asc");
-while($user = DB::fetch($query)) {
-	fwrite(STDOUT,"lefen -> $user[uid]\r\n"); 
-	$k = memberconvert::lenovomember($user['uid']);
-	
+
+
+$ProcessNum  = 1000;
+$page = (int)$_REQUEST['page'];
+$totalnum = (int)$_REQUEST['totalnum'];
+
+
+
+if ($page<2) {
+	foreach ($posttables  as  $value) {
+		DB::query("TRUNCATE TABLE ".DB::table($value));
+	}
+	$totalnum = DB::result_first("SELECT count(*)  FROM convert_lefen.".DB::table('forum_thread')." WHERE fid IN (".join(',',$fids).") ORDER BY tid asc");
+	$page = 1;
 }
 
-echo'<pre>';
-var_dump( threadconvert::lenovothread(163114) );
-echo'</pre>';exit;
+if(@ceil($totalnum/$ProcessNum) < $page){
+	$page = 1;
+}
+
+if($totalnum <= $ProcessNum*$page){
+	showmnextpage('乐粉主题数据已经转换完毕!');
+}
+
+$offset = ($page - 1) * $ProcessNum;
+
+$query = DB::query("SELECT * FROM convert_lefen.".DB::table('forum_thread')." WHERE fid IN (".join(',',$fids).") ORDER BY tid ASC LIMIT $offset,$ProcessNum");
+while($thread = DB::fetch($query)) {
+	threadconvert::lenovothread($thread['tid']);
+}
+showmnextpage("乐粉主题数组正在转换中...".$ProcessNum*$page." / $totalnum",'http://'.$_SERVER['HTTP_HOST'].$_SERVER['PHP_SELF'].'?'.'page='.($page+1).'&totalnum='.$totalnum);
+
+
+
+/*
+$query = DB::query("SELECT * FROM convert_lefen.".DB::table('forum_thread')." WHERE fid IN (".join(',',$fids).") ORDER BY tid asc");
+while($thread = DB::fetch($query)) {
+	echo "lefen thread -> $user[tid]\r\n";
+	$k = threadconvert::lenovothread($thread['tid']);
 	
+}
+*/
 
 ?>
