@@ -52,7 +52,10 @@ class memberconvert
 		$insertlen['lenovoid'] = $member['field1'];
 		DB::insert('common_member', $insert);
 		if ($member['field1']) {
-			DB::insert('common_member_lenovoid', $insertlen);
+			if (!DB::result_first("SELECT *  FROM ".DB::table('common_member_lenovoid')." WHERE lenovoid='$insertlen[lenovoid]'")) {
+				DB::insert('common_member_lenovoid', $insertlen);
+			}
+			
 		}
 	}
 }
@@ -61,7 +64,7 @@ class memberconvert
 
 ini_set('memory_limit','12800M');
 
-$ProcessNum  = 2000;
+$ProcessNum  = 10000;
 $page = (int)$_REQUEST['page'];
 $totalnum = (int)$_REQUEST['totalnum'];
 
