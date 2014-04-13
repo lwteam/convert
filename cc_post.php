@@ -182,7 +182,7 @@ while($post = DB::fetch($query)) {
 if($totalnum <= $ProcessNum*$page){
 	showmnextpage('乐Phone.CC主题POST数据已经转换完毕!');
 }
-showmnextpage("乐Phone.CC主题POST数据正在转换中...".$ProcessNum*$page." / $totalnum",'http://'.$_SERVER['HTTP_HOST'].$_SERVER['PHP_SELF'].'?'.'page='.($page+1).'&totalnum='.$totalnum,2000);
+showmnextpage("乐Phone.CC主题POST数据正在转换中...".$ProcessNum*$page." / $totalnum",'http://'.$_SERVER['HTTP_HOST'].$_SERVER['PHP_SELF'].'?'.'page='.($page+1).'&totalnum='.$totalnum,1000);
 
 /*
 
