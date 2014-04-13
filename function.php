@@ -1,6 +1,6 @@
 <?php
 set_time_limit(120);
-function showmnextpage($message,$nexturl=false){
+function showmnextpage($message,$nexturl=false,$time = 0){
 
 	$html ='';
 
@@ -44,7 +44,7 @@ function showmnextpage($message,$nexturl=false){
 		if ($nexturl) {
 			$html .='<img src="ajax_loader.gif" class="marginbot">';
 			$html .='<p class="marginbot"><a href="'.$nexturl.'">如果您的浏览器没有自动跳转，请点击这里</a></p>';
-			$html .='<script type="text/JavaScript">jQuery(function() { setTimeout("redirect(\''.$nexturl.'\');", 0)});</script>';
+			$html .='<script type="text/JavaScript">jQuery(function() { setTimeout("redirect(\''.$nexturl.'\');", '.$time.')});</script>';
 		}
 		$html .='</div>';
 
@@ -54,25 +54,24 @@ function showmnextpage($message,$nexturl=false){
 	exit;
 }
 
-function get_avatar_path($uid){
+function get_avatar_path($uid,$dir){
 
 	$uid = abs(intval($uid));
 	$uid = sprintf("%09d", $uid);
 	$dir1 = substr($uid, 0, 3);
 	$dir2 = substr($uid, 3, 2);
 	$dir3 = substr($uid, 5, 2);
-
-	$path = $dir1.'/'.$dir2.'/'.$dir3.'/'.substr($uid, -2).'_avatar_$size$.jpg';
-	nmkdir($path);
-	return  $path;
+	$path = $dir.$dir1.'/'.$dir2.'/'.$dir3.'/'.substr($uid, -2).'_avatar_$size$.jpg';
+	return str_replace ( '\\', '/',  $path );
 }
 
 function mv_avatar($uid,$olduid) {
 	$retrue = TRUE;
-	$path  = get_avatar_path($uid);
-	$oldpath  = get_avatar_path($olduid);
+	$path  = get_avatar_path($uid,AVATARPATH);
+	$oldpath  = get_avatar_path($olduid,AVATARPATH_OLD);
+	nmkdir($path);
 	foreach (array('big', 'middle', 'small') as  $value) {
-		$retrue  = $retrue && rename(AVATARPATH_OLD.str_replace('$size$', $value, $oldpath),AVATARPATH.str_replace('$size$', $value, $path));
+		$retrue  = $retrue && @rename(str_replace('$size$', $value, $oldpath),str_replace('$size$', $value, $path));
 	}
 	return $retrue;
 }
@@ -81,11 +80,14 @@ function mv_avatar($uid,$olduid) {
 function mv_attach($aid,$tableid) {
 	$attach= DB::fetch_first("SELECT * FROM ".DB::table('forum_attachment_'.$tableid)." WHERE `aid`='$aid'" );
 
-	nmkdir(ATTACHPATH.$attach['attachment']);
-	if (file_exists(ATTACHPATH_OLD.$attach['attachment'].'.thumb.jpg')) {
-		@rename(ATTACHPATH_OLD.$attach['attachment'].'.thumb.jpg',ATTACHPATH.$attach['attachment'].'.thumb.jpg');
+	$path  = str_replace ( '\\', '/',  ATTACHPATH.$attach['attachment'] );
+	$oldpath  = str_replace ( '\\', '/',  ATTACHPATH_OLD.$attach['attachment'] );
+
+	nmkdir($path);
+	if (file_exists($oldpath.'.thumb.jpg')) {
+		@rename($oldpath.'.thumb.jpg',$path.'.thumb.jpg');
 	}
-	return @rename(ATTACHPATH_OLD.$attach['attachment'],ATTACHPATH.$attach['attachment']);
+	return rename($oldpath,$path);
 }
 
 function nmkdir($path, $mode = 0777){

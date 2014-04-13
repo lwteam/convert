@@ -15,7 +15,7 @@ require 'function.php';
 ini_set('memory_limit','12800M');
 
 
-define('AVATARPATH_OLD', DISCUZ_ROOT.'convert/data/avatar/');
+define('AVATARPATH_OLD', DISCUZ_ROOT.'file/data/avatar/');
 define('AVATARPATH', DISCUZ_ROOT.'uc_server/data/avatar/');
 
 

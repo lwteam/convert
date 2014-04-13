@@ -46,7 +46,7 @@ class threadconvert
 		//获取主题内容
 		$thread = DB::fetch_first("SELECT * FROM ".DB::table('forum_thread')." WHERE `tid`='$tid'" );
 		if(!$thread){
-			//return false;
+			return false;
 		}
 		$tableid = dintval($thread['tid']{strlen($thread['tid'])-1});
 		
@@ -71,64 +71,66 @@ class threadconvert
 		}
 		$pidtopids[$post['pid']] = $newpid;
 		DB::insert('forum_post', $ccpost);
+		DB::insert('forum_thread_lephonepid', array('pid'=>$newpid,'lephonepid'=>$post['pid']));
 
-
-		$tabstatus =  DB::fetch_first("SHOW TABLE STATUS where name='pre_forum_attachment';");
-		$newaid= $tabstatus['Auto_increment'];
-		$query = DB::query("SELECT * FROM convert_lephone.".DB::table('forum_attachment')." WHERE `tid`='$post[tid]' AND `pid`='$post[pid]'  ORDER BY aid");
-		while($attach = DB::fetch($query)) {
-			$ccattach = array();
-			foreach ($tableSameArray['forum_attachment'] as $value) {
-				if ($value == 'aid') {
-					$ccattach[$value] = $newaid;
-				}elseif ($value == 'tid') {
-					$ccattach[$value] = $thread['tid'];
-				}elseif ($value == 'pid') {
-					$ccattach[$value] = $newpid;
-				}elseif ($value == 'fid') {
-					$ccattach[$value] = $thread['fid'];;	
-				}elseif ($value == 'uid') {
-					$ccattach[$value] = $uidtouids[$attach['uid']];
-				}elseif ($value == 'tableid') {
-					$ccattach['tableid'] = $tableid;
-				}else{
-					$ccattach[$value] = $attach[$value];
+		if ($post['attachment']) {
+			$tabstatus =  DB::fetch_first("SHOW TABLE STATUS where name='pre_forum_attachment';");
+			$newaid= $tabstatus['Auto_increment'];
+			$query = DB::query("SELECT * FROM convert_lephone.".DB::table('forum_attachment')." WHERE `tid`='$post[tid]' AND `pid`='$post[pid]'  ORDER BY aid");
+			while($attach = DB::fetch($query)) {
+				$ccattach = array();
+				foreach ($tableSameArray['forum_attachment'] as $value) {
+					if ($value == 'aid') {
+						$ccattach[$value] = $newaid;
+					}elseif ($value == 'tid') {
+						$ccattach[$value] = $thread['tid'];
+					}elseif ($value == 'pid') {
+						$ccattach[$value] = $newpid;
+					}elseif ($value == 'fid') {
+						$ccattach[$value] = $thread['fid'];;	
+					}elseif ($value == 'uid') {
+						$ccattach[$value] = $uidtouids[$attach['uid']];
+					}elseif ($value == 'tableid') {
+						$ccattach['tableid'] = $tableid;
+					}else{
+						$ccattach[$value] = $attach[$value];
+					}
 				}
-			}
-			DB::insert('forum_attachment', $ccattach);
+				DB::insert('forum_attachment', $ccattach);
 
 
-			$attach_num = DB::fetch_first("SELECT * FROM convert_lephone.".DB::table('forum_attachment_'.$attach['tableid'])." WHERE `aid`='$attach[aid]'" );
-			$ccattach = array();
+				$attach_num = DB::fetch_first("SELECT * FROM convert_lephone.".DB::table('forum_attachment_'.$attach['tableid'])." WHERE `aid`='$attach[aid]'" );
+				$ccattach = array();
 
 
-			foreach ($tableSameArray['forum_attachment_'.$attach['tableid']] as $value) {
-				if ($value == 'aid') {
-					$ccattach[$value] = $newaid;
-				}elseif ($value == 'tid') {
-					$ccattach[$value] = $thread['tid'];
-				}elseif ($value == 'pid') {
-					$ccattach[$value] = $newpid;
-				}elseif ($value == 'fid') {
-					$ccattach[$value] = $thread['fid'];;	
-				}elseif ($value == 'uid') {
-					$ccattach[$value] = $uidtouids[$attach['uid']];
-				}elseif ($value == 'tableid') {
-					$ccattach['tableid'] = $tableid;
-				}elseif ($value == 'attachment') {
-					$ccattach[$value] = 'lephonecc/'.$attach_num[$value];
-				}else{
-					$ccattach[$value] = $attach_num[$value];
+				foreach ($tableSameArray['forum_attachment_'.$attach['tableid']] as $value) {
+					if ($value == 'aid') {
+						$ccattach[$value] = $newaid;
+					}elseif ($value == 'tid') {
+						$ccattach[$value] = $thread['tid'];
+					}elseif ($value == 'pid') {
+						$ccattach[$value] = $newpid;
+					}elseif ($value == 'fid') {
+						$ccattach[$value] = $thread['fid'];;	
+					}elseif ($value == 'uid') {
+						$ccattach[$value] = $uidtouids[$attach['uid']];
+					}elseif ($value == 'tableid') {
+						$ccattach['tableid'] = $tableid;
+					}elseif ($value == 'attachment') {
+						$ccattach[$value] = 'lephonecc/'.$attach_num[$value];
+					}else{
+						$ccattach[$value] = $attach_num[$value];
+					}
 				}
 
+				DB::insert('forum_attachment_'.$tableid, $ccattach);
+				DB::query("UPDATE ".DB::table('forum_post')." SET `message` = replace(message, '[attach]{$attach['aid']}[/attach]', '[attach]{$newaid}[/attach]') WHERE `tid`='$thread[tid]' AND `pid`='$newpid' ;");
 				
+
+				$newaid++;		
 			}
-
-
-			DB::insert('forum_attachment_'.$tableid, $ccattach);
-			DB::query("UPDATE ".DB::table('forum_post')." SET `message` = replace(message, '[attach]{$attach['aid']}[/attach]', '[attach]{$newaid}[/attach]') WHERE `tid`='$thread[tid]' AND `pid`='$newpid' ;");
-			$newaid++;		
 		}
+
 
 
 		
@@ -142,7 +144,7 @@ ini_set('memory_limit','12800M');
 
 
 
-$ProcessNum  = 1000;
+$ProcessNum  = 5000;
 $page = (int)$_REQUEST['page'];
 $totalnum = (int)$_REQUEST['totalnum'];
 
@@ -180,9 +182,12 @@ while($post = DB::fetch($query)) {
 if($totalnum <= $ProcessNum*$page){
 	showmnextpage('乐Phone.CC主题POST数据已经转换完毕!');
 }
-showmnextpage("乐Phone.CC主题POST数据正在转换中...".$ProcessNum*$page." / $totalnum",'http://'.$_SERVER['HTTP_HOST'].$_SERVER['PHP_SELF'].'?'.'page='.($page+1).'&totalnum='.$totalnum);
+showmnextpage("乐Phone.CC主题POST数据正在转换中...".$ProcessNum*$page." / $totalnum",'http://'.$_SERVER['HTTP_HOST'].$_SERVER['PHP_SELF'].'?'.'page='.($page+1).'&totalnum='.$totalnum,2000);
 
 /*
+
+
+	DELETE FROM `pre_forum_thread_lephonepid`;
  DELETE FROM `pre_forum_post` WHERE `tid`>=166495;
  DELETE FROM `pre_forum_attachment` WHERE `tid`>=166495;
  DELETE FROM `pre_forum_attachment_0` WHERE `tid`>=166495;
