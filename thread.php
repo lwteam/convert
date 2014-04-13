@@ -57,7 +57,7 @@ ini_set('memory_limit','12800M');
 
 
 
-$ProcessNum  = 1000;
+$ProcessNum  = 5000;
 $page = (int)$_REQUEST['page'];
 $totalnum = (int)$_REQUEST['totalnum'];
 
@@ -80,7 +80,10 @@ $offset = ($page - 1) * $ProcessNum;
 
 $query = DB::query("SELECT * FROM convert_lefen.".DB::table('forum_thread')." WHERE fid IN (".join(',',$fids).") ORDER BY tid ASC LIMIT $offset,$ProcessNum");
 while($thread = DB::fetch($query)) {
-	threadconvert::lenovothread($thread['tid']);
+	if (!DB::fetch_first("SELECT *  FROM ".DB::table('forum_thread')." WHERE tid='$thread[tid]'")) {
+		threadconvert::lenovothread($thread['tid']);
+	}
+	
 }
 if($totalnum <= $ProcessNum*$page){
 	showmnextpage('乐粉主题帖子数据已经转换完毕! 将进行乐Phone.CC主题数据转换','cc_thread.php');

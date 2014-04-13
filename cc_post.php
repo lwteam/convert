@@ -142,16 +142,23 @@ ini_set('memory_limit','12800M');
 
 
 
-$ProcessNum  = 500;
+$ProcessNum  = 1000;
 $page = (int)$_REQUEST['page'];
 $totalnum = (int)$_REQUEST['totalnum'];
 
 
 
 if ($page<2) {
-	foreach ($postcleartables  as  $value) {
-		DB::query("TRUNCATE TABLE ".DB::table($value));
+	if ($postcleartables) {
+		foreach ($postcleartables  as  $value) {
+			DB::query("TRUNCATE TABLE ".DB::table($value));
+		}
 	}
+
+	$maxpid=  DB::result_first("SELECT pid  FROM ".DB::table('forum_post')." ORDER by pid desc LIMIT 1");
+
+	DB::query("REPLACE INTO ".DB::table('forum_post')." SET `pid`='$maxpid'");
+	
 	$totalnum = DB::result_first("SELECT count(*)  FROM convert_lephone.".DB::table('forum_post')." ");
 	$page = 1;
 }
@@ -166,14 +173,29 @@ $offset = ($page - 1) * $ProcessNum;
 
 $query = DB::query("SELECT * FROM convert_lephone.".DB::table('forum_post')."  ORDER BY tid ASC LIMIT $offset,$ProcessNum");
 while($post = DB::fetch($query)) {
-	threadconvert::lephonepost($post['pid']);
+	if (!DB::fetch_first("SELECT *  FROM ".DB::table('forum_thread_lephonepid')." WHERE lephonepid='$post[pid]'")) {
+		threadconvert::lephonepost($post['pid']);
+	}
 }
 if($totalnum <= $ProcessNum*$page){
 	showmnextpage('乐Phone.CC主题POST数据已经转换完毕!');
 }
 showmnextpage("乐Phone.CC主题POST数据正在转换中...".$ProcessNum*$page." / $totalnum",'http://'.$_SERVER['HTTP_HOST'].$_SERVER['PHP_SELF'].'?'.'page='.($page+1).'&totalnum='.$totalnum);
 
+/*
+ DELETE FROM `pre_forum_post` WHERE `tid`>=166495;
+ DELETE FROM `pre_forum_attachment` WHERE `tid`>=166495;
+ DELETE FROM `pre_forum_attachment_0` WHERE `tid`>=166495;
 
+ DELETE FROM `pre_forum_attachment_1` WHERE `tid`>=166495;
+ DELETE FROM `pre_forum_attachment_2` WHERE `tid`>=166495;
+ DELETE FROM `pre_forum_attachment_3` WHERE `tid`>=166495;
+ DELETE FROM `pre_forum_attachment_4` WHERE `tid`>=166495;
+ DELETE FROM `pre_forum_attachment_5` WHERE `tid`>=166495;
+ DELETE FROM `pre_forum_attachment_6` WHERE `tid`>=166495;
+ DELETE FROM `pre_forum_attachment_7` WHERE `tid`>=166495;
+ DELETE FROM `pre_forum_attachment_8` WHERE `tid`>=166495;
+ DELETE FROM `pre_forum_attachment_9` WHERE `tid`>=166495;
 
-
+*/
 ?>

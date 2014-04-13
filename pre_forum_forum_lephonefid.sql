@@ -45,6 +45,14 @@ CREATE TABLE `pre_forum_thread_lephonetid` (
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 
+DROP TABLE IF EXISTS `pre_forum_thread_lephonepid`;
+CREATE TABLE `pre_forum_thread_lephonepid` (
+  `pid` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `lephonepid` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  PRIMARY KEY (`pid`),
+  UNIQUE KEY `lephonepid` (`lephonepid`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
 
 
 

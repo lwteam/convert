@@ -64,7 +64,7 @@ class memberconvert
 
 ini_set('memory_limit','12800M');
 
-$ProcessNum  = 10000;
+$ProcessNum  = 5000;
 $page = (int)$_REQUEST['page'];
 $totalnum = (int)$_REQUEST['totalnum'];
 

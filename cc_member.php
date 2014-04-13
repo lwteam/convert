@@ -77,7 +77,7 @@ class memberconvert
 
 ini_set('memory_limit','12800M');
 
-$ProcessNum  = 2000;
+$ProcessNum  = 5000;
 $page = (int)$_REQUEST['page'];
 $totalnum = (int)$_REQUEST['totalnum'];
 
@@ -98,7 +98,10 @@ $offset = ($page - 1) * $ProcessNum;
 
 $query = DB::query("SELECT * FROM convert_lephone.".DB::table('common_member')." ORDER BY uid asc LIMIT $offset,$ProcessNum");
 while($user = DB::fetch($query)) {
-	memberconvert::lephonemember($user['uid']);
+	$lephoneuid = DB::result_first("SELECT *  FROM ".DB::table('common_member_lephoneuid')." WHERE lephoneuid='$user[uid]'" );
+	if (!$lephoneuid && $user['username']) {
+		memberconvert::lephonemember($user['uid']);
+	}
 }
 if($totalnum <= $ProcessNum*$page){
 	showmnextpage('乐Phone.CC会员数据已经转换完毕!将进行乐粉主题数据已经转换','thread.php');
