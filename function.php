@@ -106,5 +106,31 @@ function nmkdir($path, $mode = 0777){
 
 }
 
+function loadingdata(){
+	global $ProcessNum,$page,$totalnum,$starttime,$_G;
 
+	$UseRate = $ProcessNum*$page/$totalnum;
+	$UseTime = $_G['timestamp']-$starttime;
+	$NeedTime = floor($UseTime/$UseRate*(1-$UseRate));
+	$html = '<p style="font-weight:400;line-height:22px;color:#444;font-size:13px">';
+	$html .= '当前执行进度:'.sprintf('%.2f%%',$UseRate*100).' ( '.$ProcessNum*$page." / $totalnum )";
+	$html .= '<br />';
+	$html .= '执行耗时:'.timediff($_G['timestamp']-$starttime);
+	$html .= '<br />';
+	$html .= '预计剩余时间:'.timediff($NeedTime);
+	$html .= '</p>';
+	return $html;
+	
+}
+function timediff($timediff ){
+
+    $days = intval( $timediff / 86400 );
+    $remain = $timediff % 86400;
+    $hours = intval( $remain / 3600 );
+    $remain = $remain % 3600;
+    $mins = intval( $remain / 60 );
+    $secs = $remain % 60;
+    $res = ($days?$days.'天':'').($hours?$hours.'小时':'').($mins?$mins.'分钟':'').($secs?$secs.'秒':'');
+    return $res;
+}
 ?>

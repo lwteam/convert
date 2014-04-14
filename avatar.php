@@ -22,6 +22,10 @@ define('AVATARPATH', DISCUZ_ROOT.'uc_server/data/avatar/');
 $ProcessNum  = 500;
 $page = (int)$_REQUEST['page'];
 $totalnum = (int)$_REQUEST['totalnum'];
+$starttime = (int)$_REQUEST['starttime'];
+if (!$starttime) {
+	$starttime = $_G['timestamp'];
+}
 
 
 
@@ -45,8 +49,7 @@ while($user = DB::fetch($query)) {
 if($totalnum <= $ProcessNum*$page){
 	showmnextpage('乐Phone.CC用户数据搬迁完毕!');
 }
-showmnextpage("乐Phone.CC用户数据搬迁中...".$ProcessNum*$page." / $totalnum",'http://'.$_SERVER['HTTP_HOST'].$_SERVER['PHP_SELF'].'?'.'page='.($page+1).'&totalnum='.$totalnum);
-
+showmnextpage("乐Phone.CC用户数据搬迁中...".loadingdata(),'http://'.$_SERVER['HTTP_HOST'].$_SERVER['PHP_SELF'].'?'.'page='.($page+1).'&totalnum='.$totalnum.'&starttime='.$starttime,0);
 
 
 

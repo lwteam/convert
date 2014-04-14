@@ -80,7 +80,10 @@ ini_set('memory_limit','12800M');
 $ProcessNum  = 5000;
 $page = (int)$_REQUEST['page'];
 $totalnum = (int)$_REQUEST['totalnum'];
-
+$starttime = (int)$_REQUEST['starttime'];
+if (!$starttime) {
+	$starttime = $_G['timestamp'];
+}
 
 
 if ($page<2) {
@@ -106,7 +109,7 @@ while($user = DB::fetch($query)) {
 if($totalnum <= $ProcessNum*$page){
 	showmnextpage('乐Phone.CC会员数据已经转换完毕!将进行乐粉主题数据已经转换','thread.php');
 }
-showmnextpage("乐Phone.CC会员数据正在转换中...".$ProcessNum*$page." / $totalnum",'http://'.$_SERVER['HTTP_HOST'].$_SERVER['PHP_SELF'].'?'.'page='.($page+1).'&totalnum='.$totalnum);
+showmnextpage("乐Phone.CC会员数据正在转换中...".loadingdata(),'http://'.$_SERVER['HTTP_HOST'].$_SERVER['PHP_SELF'].'?'.'page='.($page+1).'&totalnum='.$totalnum.'&starttime='.$starttime,0);
 
 
 
