@@ -63,6 +63,11 @@ class memberconvert
 				$insert[$value] = $member[$value];
 			}
 		}
+		//清理所有管理权限
+		$insert['adminid'] = '0';
+		$insert['groupid'] = '10';
+		$insert['allowadmincp'] = '0';
+		$insert['groupid'] = '10';
 
 		$insertlen['uid'] = $newuid;
 		$insertlen['lephoneuid'] = $omember['uid'];
