@@ -55,7 +55,7 @@ $handlinglist= array(
 	13=>4,
 	14=>1,
 	16=>3,
-	18=>14,
+	18=>1,
 	34=>4,
 );
 
@@ -67,11 +67,15 @@ class threadconvert
 		global $typeidclasslist,$handlinglist;
 		$classid = $typeidclasslist[$thread['typeid']]?$typeidclasslist[$thread['typeid']]:2;
 		$handling = $handlinglist[$thread['stamp']]?$handlinglist[$thread['stamp']]:0;
+		
 		$insert = array();
 		$insert['tid']		= $thread['tid'];
 		$insert['uid']		= $thread['authorid'];
 		$insert['username']	= $thread['author'];
 		$insert['classid'] 	= $classid;
+		if ($thread['stamp'] == 18) {
+			$insert['supply'] = 1;
+		}
 		$insert['dateline'] = $insert['handtime'] = $insert['lasttime']  = $thread['dateline'];
 		$insert['samenum']	= $thread['recommend_add'];
 		$insert['handling']	= $handling;
