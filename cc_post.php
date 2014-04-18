@@ -162,7 +162,7 @@ if ($page<2) {
 
 	$maxpid=  DB::result_first("SELECT pid  FROM ".DB::table('forum_post')." ORDER by pid desc LIMIT 1");
 
-	DB::query("REPLACE INTO ".DB::table('forum_post')." SET `pid`='$maxpid'");
+	DB::query("REPLACE INTO ".DB::table('forum_post_tableid')." SET `pid`='$maxpid'");
 	
 	$totalnum = DB::result_first("SELECT count(*)  FROM convert_lephone.".DB::table('forum_post')." ");
 	$page = 1;

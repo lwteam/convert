@@ -122,7 +122,7 @@ while($thread = DB::fetch($query)) {
 	}
 }
 if($totalnum <= $ProcessNum*$page){
-	DB::query("UPDATE ".DB::table($value)." SET `displayorder`='1' WHERE (`displayorder`>'1')");
+	DB::query("UPDATE ".DB::table('forum_thread')." SET `displayorder`='1' WHERE (`displayorder`>'1')");
 	showmnextpage('乐Phone.CC主题数据已经转换完毕! 将进行POST数据转换!','cc_post.php');
 }
 
