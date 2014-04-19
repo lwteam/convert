@@ -12,8 +12,30 @@ $discuz = & discuz_core::instance();
 $discuz->init();
 
 
-
 $forumtables = array('forum_forum','forum_forumfield','forum_threadclass');
+
+$convertfups = array(255,665);
+
+$fupfids = join(',',$convertfups);
+
+
+$query = DB::query("SELECT f.* FROM convert_lefen.".DB::table('forum_forum')." f 
+	WHERE f.status='1' AND (f.fup IN ($fupfids) || f.fid IN ($fupfids) ) AND f.type IN ('forum','group') ");
+
+while($forum = DB::fetch($query)) {
+	$opfids[] = $forum['fid'];
+	if ($forum['type'] == 'forum') {
+		$suball =  DB::fetch_all("SELECT f.* FROM convert_lefen.".DB::table('forum_forum')." f 
+				WHERE f.status='1' AND f.fup='$forum[fid]'  AND f.type ='sub';");
+		if ($suball) {
+			foreach ($suball as $value) {
+				$opfids[] = $value['fid'];
+			}
+		}
+	}
+}
+
+
 
 
 foreach ($forumtables  as  $value) {
@@ -111,17 +133,21 @@ class forumconvert
 }
 
 
-$query = DB::query("SELECT * FROM convert_lefen.".DB::table('forum_forum')." ORDER BY fid asc");
+$allfids = join(',',$opfids);
+
+	
+$query = DB::query("SELECT * FROM convert_lefen.".DB::table('forum_forum')." WHERE fid IN ($allfids)  ORDER BY fid asc");
 while($forum = DB::fetch($query)) {
-	fwrite(STDOUT,"lefen fid -> $forum[fid]\r\n"); 
 	forumconvert::lenovoforum($forum['fid']);
 }
 
 $query = DB::query("SELECT * FROM convert_lephone.".DB::table('forum_forum')." ORDER BY type");
-while($forum = DB::fetch($query)) {
-	fwrite(STDOUT,"lephone fid -> $forum[fid]\r\n"); 
+while($forum = DB::fetch($query)) { 
 	forumconvert::lephoneforum($forum['fid'],$forum);
 
 }
-
+echo'<pre>';
+var_dump( $allfids );
+echo'</pre>';exit;
+	
 ?>
