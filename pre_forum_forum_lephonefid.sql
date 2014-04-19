@@ -23,10 +23,36 @@ DROP TABLE IF EXISTS `pre_common_member_lenovoid`;
 CREATE TABLE `pre_common_member_lenovoid` (
   `uid` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `lenovoid` char(15) NOT NULL DEFAULT '',
-  `renamed` tinyint(1) unsigned NOT NULL DEFAULT '0', -- 已经更改过用户名
+  `dateline` int(10) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`uid`),
   UNIQUE KEY `lenovoid` (`lenovoid`)
 ) ENGINE=MyISAM AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+
+
+
+DROP TABLE IF EXISTS `pre_common_member_lephoneuid`;
+CREATE TABLE `pre_common_member_lephoneuid` (
+  `uid` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `lephoneuid` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `lephoneusername` char(15) NOT NULL DEFAULT '',
+  `lephoneemail` char(40) NOT NULL DEFAULT '',
+  PRIMARY KEY (`uid`),
+  UNIQUE KEY `lephoneuid` (`lephoneuid`),
+  UNIQUE KEY `lephoneusername` (`lephoneusername`),
+  KEY `lephoneemail` (`lephoneemail`)
+) ENGINE=MyISAM AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `pre_common_member_accountchange`;
+CREATE TABLE `pre_common_member_accountchange` (
+  `uid` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `username`  char(24) NOT NULL DEFAULT '',
+  `email`  char(255) NOT NULL DEFAULT '',
+  `rename` tinyint(1) unsigned NOT NULL DEFAULT '0', -- 是否更改用户名
+  `renamed` tinyint(1) unsigned NOT NULL DEFAULT '0', -- 是否成功更改
+  PRIMARY KEY (`uid`),
+  UNIQUE KEY `renamed` (`rename`,`renamed`)
+) ENGINE=MyISAM AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+
 
 DROP TABLE IF EXISTS `pre_forum_forum_lephonefid`;
 CREATE TABLE `pre_forum_forum_lephonefid` (
@@ -57,18 +83,6 @@ CREATE TABLE `pre_forum_thread_lephonepid` (
 
 
 
-DROP TABLE IF EXISTS `pre_common_member_lephoneuid`;
-CREATE TABLE `pre_common_member_lephoneuid` (
-  `uid` mediumint(8) unsigned NOT NULL DEFAULT '0',
-  `lephoneuid` mediumint(8) unsigned NOT NULL DEFAULT '0',
-  `lephoneusername` char(15) NOT NULL DEFAULT '',
-  `lephoneemail` char(40) NOT NULL DEFAULT '',
-  `renamed` tinyint(1) unsigned NOT NULL DEFAULT '0', -- 已经更改过用户名
-  PRIMARY KEY (`uid`),
-  UNIQUE KEY `lephoneuid` (`lephoneuid`),
-  UNIQUE KEY `lephoneusername` (`lephoneusername`),
-  KEY `lephoneemail` (`lephoneemail`)
-) ENGINE=MyISAM AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
 
 
   

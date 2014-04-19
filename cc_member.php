@@ -75,6 +75,7 @@ class memberconvert
 		$insertlen['lephoneemail'] = $omember['email'];
 		DB::insert('common_member', $insert);
 		DB::insert('common_member_lephoneuid', $insertlen);
+		DB::insert('common_member_accountchange', array('uid'=>$insert['uid'],'username'=>$insert['username'],'email'=>$insert['email']));
 	}
 }
 

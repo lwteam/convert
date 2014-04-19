@@ -51,6 +51,7 @@ class memberconvert
 		$insertlen['uid'] = $member['uid'];
 		$insertlen['lenovoid'] = $member['field1'];
 		DB::insert('common_member', $insert);
+		DB::insert('common_member_accountchange', array('uid'=>$member['uid'],'username'=>$member['username'],'email'=>$member['email']));
 		if ($member['field1']) {
 			if (!DB::result_first("SELECT *  FROM ".DB::table('common_member_lenovoid')." WHERE lenovoid='$insertlen[lenovoid]'")) {
 				DB::insert('common_member_lenovoid', $insertlen);
