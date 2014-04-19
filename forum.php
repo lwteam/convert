@@ -102,7 +102,7 @@ class forumconvert
 
 		DB::insert('forum_forum_lephonefid', array('fid'=>$newfid,'lephonefid'=>$fid));
 
-
+		$returnarray = array('fid'=>$newfid,'lephonefid'=>$fid);
 
 		foreach ($forumtables as  $table) {
 
@@ -129,6 +129,8 @@ class forumconvert
 			}
 			DB::query("insert into ".DB::table($table)." (".join(',',$CcTableSameArray[$table]).") select ".join(',',$NewCcTableSameArray[$table])." from convert_lephone.".DB::table($table)." where fid ='$fid'");
 		}
+
+		return $returnarray;
 	}
 }
 
@@ -143,11 +145,11 @@ while($forum = DB::fetch($query)) {
 
 $query = DB::query("SELECT * FROM convert_lephone.".DB::table('forum_forum')." ORDER BY type");
 while($forum = DB::fetch($query)) { 
-	forumconvert::lephoneforum($forum['fid'],$forum);
+	$lepfids[$forum['fid'].$forum['name']] = forumconvert::lephoneforum($forum['fid'],$forum);
 
 }
 echo'<pre>';
-var_dump( $allfids );
+var_dump( $allfids,$lepfids );
 echo'</pre>';exit;
 	
 ?>
