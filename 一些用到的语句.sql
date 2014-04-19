@@ -12,3 +12,5 @@ UPDATE `pre_forum_forum` SET `forumcolumns`='5' WHERE (`fid` IN (747,746,745,744
 -- 乐家族设置为 4
 
 UPDATE `pre_forum_forum` SET `forumcolumns`='4' WHERE (`fid` IN (255));
+
+UPDATE `pre_forum_forum` SET `jammer`='0' ; -- 取消所有干扰码

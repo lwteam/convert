@@ -14,7 +14,11 @@ $discuz->init();
 
 $forumtables = array('forum_forum','forum_forumfield','forum_threadclass');
 
+$clearforumtables = array('forum_forum_lephonefid','forum_forum','forum_forumfield','forum_threadclass');
+
+
 $convertfups = array(255,665);
+$convertlefids = array(85,87,67,71,4,13);
 
 $fupfids = join(',',$convertfups);
 
@@ -38,7 +42,7 @@ while($forum = DB::fetch($query)) {
 
 
 
-foreach ($forumtables  as  $value) {
+foreach ($clearforumtables   as  $value) {
 	DB::query("TRUNCATE TABLE  ".DB::table($value));
 }
 DB::query("truncate table  ".DB::table('forum_forum_lephonefid'));
@@ -136,6 +140,7 @@ class forumconvert
 
 
 $allfids = join(',',$opfids);
+$alllefids = join(',',$convertlefids);
 
 	
 $query = DB::query("SELECT * FROM convert_lefen.".DB::table('forum_forum')." WHERE fid IN ($allfids)  ORDER BY fid asc");
@@ -143,7 +148,7 @@ while($forum = DB::fetch($query)) {
 	forumconvert::lenovoforum($forum['fid']);
 }
 
-$query = DB::query("SELECT * FROM convert_lephone.".DB::table('forum_forum')." ORDER BY type");
+$query = DB::query("SELECT * FROM convert_lephone.".DB::table('forum_forum')."  WHERE fid IN ($alllefids)  ORDER BY type");
 while($forum = DB::fetch($query)) { 
 	$lepfids[$forum['fid'].$forum['name']] = forumconvert::lephoneforum($forum['fid'],$forum);
 
