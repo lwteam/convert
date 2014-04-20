@@ -29,7 +29,12 @@ class memberconvert
 		$insert['threads']	= DB::result_first("SELECT count(*)  FROM ".DB::table('forum_post')." WHERE authorid='$uid'");
 		$insert['extcredits1']	= '0';
 		$insert['extcredits2']	= $insert['posts']+$insert['threads'];
-		$insert['extcredits8']	= '1';
+		$insert['extcredits6']	= DB::result_first("SELECT extcredits1  FROM convert_lefen.".DB::table('common_member_count')." WHERE uid='$uid'");;
+		// 乐卡
+		$omember = DB::fetch_first("SELECT * FROM ".DB::table('common_member_lephoneuid')." WHERE `uid`='$uid'" );
+		$member_count = DB::fetch_first("SELECT *  FROM convert_lephone.".DB::table('common_member_count')." WHERE uid='$omember[lephoneuid]'");
+		$insert['extcredits7']	= $member_count['extcredits1']; // 金币
+		$insert['extcredits8']	= $member_count['extcredits2']; //铜板
 
 
 		DB::insert('common_member_count', $insert);
