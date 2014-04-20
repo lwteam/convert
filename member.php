@@ -16,7 +16,7 @@ require 'function.php';
 
 $memberfields = array('uid', 'email', 'username', 'password', 'status', 'emailstatus', 'avatarstatus', 'videophotostatus', 'groupid',  'regdate',   'timeoffset',);
 $membeructables = array('ucenter_members', 'ucenter_memberfields');
-$membercleartables = array('ucenter_members', 'ucenter_memberfields','common_member','common_member_lenovoid','common_member_lephoneuid');
+$membercleartables = array('ucenter_members', 'ucenter_memberfields','common_member','common_member_lenovoid','common_member_accountchange','common_member_lephoneuid');
 /**
 * 
 */
