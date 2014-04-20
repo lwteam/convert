@@ -18,6 +18,9 @@ $postcleartables = array('forum_thread_lephonetid');
 
 //$postcleartables = array('forum_thread_lephonetid','forum_post_tableid','forum_thread','forum_post','forum_attachment','forum_attachment_0','forum_attachment_1','forum_attachment_2','forum_attachment_3','forum_attachment_4','forum_attachment_5','forum_attachment_6','forum_attachment_7','forum_attachment_8','forum_attachment_9','forum_poll','forum_polloption','forum_polloption_image','forum_pollvoter','forum_post','forum_post_location','forum_postcomment','forum_postlog','forum_poststick');
 
+$convertlefids = array(85,87,67,71,4,13);
+
+$convertlefidsjoin = join(',',$convertlefids);
 
 
 
@@ -52,7 +55,9 @@ class threadconvert
 		$omember = DB::fetch_first("SELECT * FROM ".DB::table('common_member_lephoneuid')." WHERE `lephoneuid`='$thread[authorid]'" );
 		$forum = DB::fetch_first("SELECT * FROM ".DB::table('forum_forum_lephonefid')." WHERE `lephonefid`='$thread[fid]'" );
 
-
+		if(!$thread||!$forum||!$omember){
+			return false;
+		}
 	
 		$uid = $omember['uid'];
 		$username = $omember['lephoneusername'].'@lephone';
@@ -104,7 +109,7 @@ if ($page<2) {
 	foreach ($postcleartables  as  $value) {
 		DB::query("TRUNCATE TABLE ".DB::table($value));
 	}
-	$totalnum = DB::result_first("SELECT count(*)  FROM convert_lephone.".DB::table('forum_thread')." ORDER BY tid asc");
+	$totalnum = DB::result_first("SELECT count(*)  FROM convert_lephone.".DB::table('forum_thread')."  WHERE fid IN ($convertlefidsjoin) ORDER BY tid asc");
 	$page = 1;
 }
 
@@ -115,7 +120,7 @@ if(@ceil($totalnum/$ProcessNum) < $page){
 
 $offset = ($page - 1) * $ProcessNum;
 
-$query = DB::query("SELECT * FROM convert_lephone.".DB::table('forum_thread')." ORDER BY tid ASC LIMIT $offset,$ProcessNum");
+$query = DB::query("SELECT * FROM convert_lephone.".DB::table('forum_thread')." WHERE fid IN ($convertlefidsjoin) ORDER BY tid ASC LIMIT $offset,$ProcessNum");
 while($thread = DB::fetch($query)) {
 	if (!DB::fetch_first("SELECT *  FROM ".DB::table('forum_thread_lephonetid')." WHERE lephonetid='$thread[tid]'")) {
 		threadconvert::lephonethread($thread['tid']);

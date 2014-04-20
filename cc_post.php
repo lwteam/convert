@@ -14,7 +14,9 @@ require 'function.php';
 
 $posttables = array('forum_thread','forum_post','forum_attachment','forum_attachment_0','forum_attachment_1','forum_attachment_2','forum_attachment_3','forum_attachment_4','forum_attachment_5','forum_attachment_6','forum_attachment_7','forum_attachment_8','forum_attachment_9');
 
+$convertlefids = array(85,87,67,71,4,13);
 
+$convertlefidsjoin = join(',',$convertlefids);
 
 $tableSameArray = array();
 
@@ -45,7 +47,7 @@ class threadconvert
 		$tid =  DB::result_first("SELECT `tid` FROM ".DB::table('forum_thread_lephonetid')." WHERE `lephonetid`='$post[tid]'" );
 		//获取主题内容
 		$thread = DB::fetch_first("SELECT * FROM ".DB::table('forum_thread')." WHERE `tid`='$tid'" );
-		if(!$thread){
+		if(!$thread||!$tid||!$thread['fid']){
 			return false;
 		}
 		$tableid = dintval($thread['tid']{strlen($thread['tid'])-1});
@@ -164,7 +166,7 @@ if ($page<2) {
 
 	DB::query("REPLACE INTO ".DB::table('forum_post_tableid')." SET `pid`='$maxpid'");
 	
-	$totalnum = DB::result_first("SELECT count(*)  FROM convert_lephone.".DB::table('forum_post')." ");
+	$totalnum = DB::result_first("SELECT count(*)  FROM convert_lephone.".DB::table('forum_post')."  WHERE fid IN ($convertlefidsjoin) ");
 	$page = 1;
 
 }
@@ -177,7 +179,7 @@ if(@ceil($totalnum/$ProcessNum) < $page){
 
 $offset = ($page - 1) * $ProcessNum;
 
-$query = DB::query("SELECT * FROM convert_lephone.".DB::table('forum_post')."  ORDER BY tid ASC LIMIT $offset,$ProcessNum");
+$query = DB::query("SELECT * FROM convert_lephone.".DB::table('forum_post')." WHERE fid IN ($convertlefidsjoin)   ORDER BY tid ASC LIMIT $offset,$ProcessNum");
 while($post = DB::fetch($query)) {
 	if (!DB::fetch_first("SELECT *  FROM ".DB::table('forum_thread_lephonepid')." WHERE lephonepid='$post[pid]'")) {
 		threadconvert::lephonepost($post['pid']);

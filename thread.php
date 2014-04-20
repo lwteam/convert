@@ -13,10 +13,35 @@ $discuz->init();
 require 'function.php';
 
 $posttables = array('forum_thread','forum_attachment','forum_attachment_0','forum_attachment_1','forum_attachment_2','forum_attachment_3','forum_attachment_4','forum_attachment_5','forum_attachment_6','forum_attachment_7','forum_attachment_8','forum_attachment_9','forum_poll','forum_polloption','forum_polloption_image','forum_pollvoter','forum_post','forum_post_location','forum_postcomment','forum_postlog','forum_poststick');
-$fids = array(649,730,668,329,269,335,648,383,669,715,264,400,677,678,728,729,714,690,734,706,705,686,683,699,691,724,713,711,733,737,637,660,674,362,293,639,386,385,662,670,675,687);
 
 
 $postcleartables = array('forum_thread_lephonetid','forum_post_tableid','forum_thread','forum_post','forum_attachment','forum_attachment_0','forum_attachment_1','forum_attachment_2','forum_attachment_3','forum_attachment_4','forum_attachment_5','forum_attachment_6','forum_attachment_7','forum_attachment_8','forum_attachment_9','forum_poll','forum_polloption','forum_polloption_image','forum_pollvoter','forum_post','forum_post_location','forum_postcomment','forum_postlog','forum_poststick');
+
+
+$convertfups = array(255,665);
+$convertlefids = array(85,87,67,71,4,13);
+
+$fupfids = join(',',$convertfups);
+
+
+$query = DB::query("SELECT f.* FROM convert_lefen.".DB::table('forum_forum')." f 
+	WHERE f.status='1' AND (f.fup IN ($fupfids) || f.fid IN ($fupfids) ) AND f.type IN ('forum','group') ");
+
+while($forum = DB::fetch($query)) {
+	$opfids[] = $forum['fid'];
+	if ($forum['type'] == 'forum') {
+		$suball =  DB::fetch_all("SELECT f.* FROM convert_lefen.".DB::table('forum_forum')." f 
+				WHERE f.status='1' AND f.fup='$forum[fid]'  AND f.type ='sub';");
+		if ($suball) {
+			foreach ($suball as $value) {
+				$opfids[] = $value['fid'];
+			}
+		}
+	}
+}
+
+
+
 
 $bugfid = 730;
 
@@ -70,7 +95,7 @@ if ($page<2) {
 	foreach ($postcleartables  as  $value) {
 		DB::query("TRUNCATE TABLE ".DB::table($value));
 	}
-	$totalnum = DB::result_first("SELECT count(*)  FROM convert_lefen.".DB::table('forum_thread')." WHERE fid IN (".join(',',$fids).") ORDER BY tid asc");
+	$totalnum = DB::result_first("SELECT count(*)  FROM convert_lefen.".DB::table('forum_thread')." WHERE fid IN (".join(',',$opfids).") ORDER BY tid asc");
 	$page = 1;
 }
 
@@ -81,7 +106,7 @@ if(@ceil($totalnum/$ProcessNum) < $page){
 
 $offset = ($page - 1) * $ProcessNum;
 
-$query = DB::query("SELECT * FROM convert_lefen.".DB::table('forum_thread')." WHERE fid IN (".join(',',$fids).") ORDER BY tid ASC LIMIT $offset,$ProcessNum");
+$query = DB::query("SELECT * FROM convert_lefen.".DB::table('forum_thread')." WHERE fid IN (".join(',',$opfids).") ORDER BY tid ASC LIMIT $offset,$ProcessNum");
 while($thread = DB::fetch($query)) {
 	if (!DB::fetch_first("SELECT *  FROM ".DB::table('forum_thread')." WHERE tid='$thread[tid]'")) {
 		threadconvert::lenovothread($thread['tid']);
